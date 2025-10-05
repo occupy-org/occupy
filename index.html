@@ -74,6 +74,16 @@ body::after{
 
 /* Hide app initially */
 #app{ display:none; }
+
+/* Updates Panel */
+#updates-content {
+  background: #001500;
+  padding: 16px;
+  border: 1px solid var(--border);
+  white-space: pre-wrap;
+  overflow-y: auto;
+  max-height: 600px;
+}
 </style>
 </head>
 <body>
@@ -97,6 +107,7 @@ body::after{
   <nav class="nav">
     <a href="#" data-page="home" class="active">Home</a>
     <a href="#" data-page="map">Map</a>
+    <a href="#" data-page="updates">Updates</a>
     <a href="#" data-page="about">About</a>
     <a href="#" data-page="privacy">Privacy Policy</a>
   </nav>
@@ -107,7 +118,15 @@ body::after{
 <section id="home" class="panel" style="display:block;">
 <h2>Welcome to Site-OC-01</h2>
 
-<p>Site-OC-01 is a multi-facility research and containment site, that functions to study anomalous entities. Each area—or zone—has a specific, but smudgy, purpose, danger, and unknown that becomes a constant source of torment for staff and players alike.</p>
+<p>Hi, my name is Occupy and I am actively working on a project inspired by the SCP Foundation, though not affiliated.</p>
+
+<p>This will mainly be an XR or VR project, and I will now go further in depth about this:</p>
+
+<ul>
+  <li>This will mainly be a horror-focused game/project.</li>
+  <li>It will take a while to polish and get ready.</li>
+  <li>There are multiple 'wings' to the facility site in VR, and I will now go further in depth:</li>
+</ul>
 
 <ul>
   <li><strong>TOG-Alpha:</strong> Admin / Research Hubs that include labs housing the latest technology and rooms where anomalies are reviewed as a way to prepare for cataloging.</li>
@@ -118,8 +137,13 @@ body::after{
   <li><strong>TOG-Zeta:</strong> Quarantine wing for isolated, highly unstable anomalous entities—mostly each other and redundant for containment.</li>
 </ul>
 
-<p>The staff—whether they are trained personnel or players—are in charge of organizational, lab research, or administrative duties, and ensuring safety for all personnel and contained entities. Each area holds both predictable and deceiving forms of risk, operating under a constant atmosphere of tension, intrigue, and coincidence.</p>
+<p>This will be a solo dev project and WILL release on the Meta store. The project is most likely releasing very late 2025 or early 2026. See you all until then! I will be posting updates on the "Updates" page.</p>
 
+</section>
+
+<section id="updates" class="panel" style="display:none;">
+<h2>Project Updates</h2>
+<div id="updates-content">Fetching updates from GitHub...</div>
 </section>
 
 <section id="map" class="panel" style="display:none;">
@@ -150,7 +174,9 @@ document.addEventListener("DOMContentLoaded", function(){
   const app = document.getElementById('app');
   const enterBtn = document.getElementById('enterBtn');
   const startupAudio = document.getElementById('startupSound');
+  const updatesContainer = document.getElementById('updates-content');
 
+  // Intro / enter button logic
   enterBtn.addEventListener('click', ()=>{
     introLogo.style.transform = 'scale(0.6) translateY(-80px)';
     intro.style.opacity = '0';
@@ -161,6 +187,7 @@ document.addEventListener("DOMContentLoaded", function(){
     }, 800);
   });
 
+  // Navigation
   document.querySelectorAll('.nav a').forEach(a=>{
     a.addEventListener('click', e=>{
       e.preventDefault();
@@ -170,6 +197,14 @@ document.addEventListener("DOMContentLoaded", function(){
       document.querySelectorAll('.nav a').forEach(x=>x.classList.remove('active'));
       a.classList.add('active');
       window.scrollTo({top:0, behavior:'smooth'});
+
+      // If updates page, fetch GitHub text
+      if(page === 'updates'){
+        fetch('https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME/main/updates.txt')
+          .then(res => res.ok ? res.text() : Promise.reject('Failed to fetch updates'))
+          .then(text => updatesContainer.textContent = text)
+          .catch(() => updatesContainer.textContent = 'Could not fetch updates at this time.');
+      }
     });
   });
 });
