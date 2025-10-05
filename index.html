@@ -143,7 +143,7 @@ body::after{
 
 <section id="updates" class="panel" style="display:none;">
 <h2>Project Updates</h2>
-<div id="updates-content">Fetching updates from GitHub...</div>
+<div id="updates-content">Fetching updates...</div>
 </section>
 
 <section id="map" class="panel" style="display:none;">
@@ -198,9 +198,9 @@ document.addEventListener("DOMContentLoaded", function(){
       a.classList.add('active');
       window.scrollTo({top:0, behavior:'smooth'});
 
-      // If updates page, fetch GitHub text
+      // If updates page, fetch local updates.txt
       if(page === 'updates'){
-        fetch('https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME/main/updates.txt')
+        fetch('updates.txt')
           .then(res => res.ok ? res.text() : Promise.reject('Failed to fetch updates'))
           .then(text => updatesContainer.textContent = text)
           .catch(() => updatesContainer.textContent = 'Could not fetch updates at this time.');
