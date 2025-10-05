@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Site-OC-01 — The Occupy Organization</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#001100;
+  --accent:#00ff00;
+  --panel-bg:#002200;
+  --white:#f0f0d0;
+  --border:#00ff00;
+}
+body, html{
+  margin:0; padding:0; height:100%; background: var(--bg); font-family:'Share Tech Mono', monospace; color: var(--white);
+  line-height:1.6; overflow-x:hidden;
+}
+header{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 24px; background: var(--panel-bg); border-bottom:2px solid var(--border);
+  position:relative; z-index:1;
+}
+.logo-container{
+  display:flex; flex-direction:column; align-items:center;
+  transition: all 0.8s ease-out;
+}
+.logo-container img{
+  max-width:180px; height:auto; margin-bottom:4px;
+}
+.site-name{ color: var(--accent); font-weight:700; font-size:20px; }
+.site-subtext{ color: var(--white); font-size:12px; }
+.nav a{
+  color: var(--white); text-decoration:none; margin-left:12px; padding:6px 10px; border:1px solid var(--border); border-radius:0; background:#002200;
+  transition: background 0.2s, color 0.2s;
+}
+.nav a.active, .nav a:hover{ background: var(--accent); color:#001100; cursor:pointer; }
+.container{ max-width:1100px; margin:24px auto; padding:16px; }
+.panel{ 
+  background: #002200; 
+  border:1px solid var(--border); border-radius:0; padding:20px; margin-bottom:24px;
+}
+.panel h2{ color: var(--accent); font-size:24px; margin-bottom:12px; }
+.panel p, .panel li{ color: var(--white); font-size:16px; }
+.panel ul{ margin-left:20px; margin-top:8px; }
+.map-holder{ width:100%; height:700px; background:#001100; border:2px solid #ff0000; border-radius:0; overflow:hidden; display:flex; justify-content:center; align-items:center; }
+.map-overlay-text{ color:#f0f0d0; font-size:18px; font-weight:bold; text-align:center; animation: flicker 1s infinite; }
+@keyframes flicker{ 0%,19%,21%,23%,25%,54%,56%,100%{opacity:1;} 20%,22%,24%,55%{opacity:0;} }
+ul{margin-top:8px; margin-left:20px;} li{margin-bottom:4px;}
+.footer{ font-size:12px; text-align:center; color: var(--white); margin-top:32px; }
+
+/* Scanline overlay */
+body::after{
+  content:""; position:fixed; top:0; left:0; width:100%; height:100%;
+  background: repeating-linear-gradient(transparent, transparent 1px, rgba(0,255,0,0.05) 2px);
+  pointer-events:none; z-index:9999;
+}
+
+/* Intro */
+#intro{
+  position:fixed; top:0; left:0; width:100vw; height:100vh; background:#001100;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  z-index:10000; transition: opacity 1s ease;
+}
+#intro img{
+  max-width:300px; height:auto;
+  transition: all 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+#intro .site-text{ color: var(--accent); font-weight:700; font-size:28px; margin-top:12px; }
+#intro .site-subtext{ color: var(--white); font-size:14px; margin-top:4px; }
+#enterBtn{ margin-top:20px; background: var(--accent); color:#001100; font-family:'Share Tech Mono'; font-size:24px; padding:20px 40px; border:none; cursor:pointer; }
+#enterBtn:hover{ background:#00cc00; }
+
+/* Hide app initially */
+#app{ display:none; }
+</style>
+</head>
+<body>
+
+<audio id="startupSound" src="startup-87026.mp3"></audio>
+
+<div id="intro">
+  <img id="introLogo" src="The.png" alt="Logo">
+  <div class="site-text">Site-OC-01</div>
+  <div class="site-subtext">A project by Occupy.</div>
+  <button id="enterBtn">Enter the Facility</button>
+</div>
+
+<div id="app">
+<header>
+  <div class="logo-container" id="headerLogoContainer">
+    <img src="The.png" alt="Logo">
+    <div class="site-name">Site-OC-01 — Occupy Containment & Research Facility</div>
+    <div class="site-subtext">A project by Occupy.</div>
+  </div>
+  <nav class="nav">
+    <a href="#" data-page="home" class="active">Home</a>
+    <a href="#" data-page="map">Map</a>
+    <a href="#" data-page="about">About</a>
+    <a href="#" data-page="privacy">Privacy Policy</a>
+  </nav>
+</header>
+
+<div class="container">
+
+<section id="home" class="panel" style="display:block;">
+<h2>Welcome to Site-OC-01</h2>
+<p>Site-OC-01 is an expansive, multi-site containment and research facility designed to explore anomalous phenomena. The facility is divided into several zones, each with its own purpose, dangers, and mysteries that challenge personnel at every turn.</p>
+<ul>
+<li><strong>TOG-Alpha:</strong> Administrative and research hub, featuring high-tech laboratories and briefing rooms where new anomalies are cataloged.</li>
+<li><strong>TOG-Bravo:</strong> Experimental laboratories, where unusual specimens and anomalies are studied under strict containment protocols.</li>
+<li><strong>TOG-Charlie:</strong> Containment wing for high-risk entities, featuring secure chambers, observation corridors, and emergency lockdown systems.</li>
+<li><strong>TOG-Delta:</strong> Surveillance and security operations, including monitoring stations, patrol routes, and security checkpoints.</li>
+<li><strong>TOG-Echo:</strong> Maintenance and reactor areas, where environmental hazards and essential systems coexist in a tense operational space.</li>
+<li><strong>TOG-Zeta:</strong> Quarantine wing for highly unstable anomalies, isolated from other sections of the facility and heavily fortified.</li>
+</ul>
+<p>The facility is staffed with trained personnel (players), responsible for maintaining order, conducting research, and ensuring the safety of all personnel and contained entities. Every zone contains both predictable and unpredictable elements, creating a constant sense of tension and intrigue.</p>
+<p>Over time, Site-OC-01 will expand with new sites, challenges, and features, establishing itself as a long-term project with an evolving narrative and immersive exploration experience.</p>
+</section>
+
+<section id="map" class="panel" style="display:none;">
+<h2>Interactive Facility Map</h2>
+<div class="map-holder">
+  <div class="map-overlay-text">We’re not sure what’s happening here right now… it’ll be back soon.</div>
+</div>
+</section>
+
+<section id="about" class="panel" style="display:none;">
+<h2>About Site-OC-01</h2>
+<p>Site-OC-01 is a VR project created by The Occupy Organization. All content is protected under CC BY-NC-ND 4.0.</p>
+</section>
+
+<section id="privacy" class="panel" style="display:none;">
+<h2>Privacy Policy</h2>
+<p>Oops, we're not there yet.</p>
+</section>
+
+<div class="footer">© The Occupy Organization — Site-OC-01 · Licensed CC BY-NC-ND 4.0</div>
+</div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  const intro = document.getElementById('intro');
+  const introLogo = document.getElementById('introLogo');
+  const app = document.getElementById('app');
+  const enterBtn = document.getElementById('enterBtn');
+  const startupAudio = document.getElementById('startupSound');
+
+  enterBtn.addEventListener('click', ()=>{
+    introLogo.style.transform = 'scale(0.6) translateY(-80px)';
+    intro.style.opacity = '0';
+    setTimeout(()=>{
+      intro.style.display='none';
+      app.style.display='block';
+      try{ startupAudio.play(); } catch(e){ console.log(e); }
+    }, 800);
+  });
+
+  document.querySelectorAll('.nav a').forEach(a=>{
+    a.addEventListener('click', e=>{
+      e.preventDefault();
+      const page = a.dataset.page;
+      document.querySelectorAll('.container section').forEach(s=>s.style.display='none');
+      document.getElementById(page).style.display='block';
+      document.querySelectorAll('.nav a').forEach(x=>x.classList.remove('active'));
+      a.classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
+});
+</script>
+</body>
+</html>
