@@ -1,213 +1,479 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Site-OC-01 — OCCUPY</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#001100;
-  --accent:#00ff00;
-  --panel-bg:#002200;
-  --white:#f0f0d0;
-  --border:#00ff00;
-}
-body, html{
-  margin:0; padding:0; height:100%; background: var(--bg); font-family:'Share Tech Mono', monospace; color: var(--white);
-  line-height:1.6; overflow-x:hidden;
-}
-header{
-  display:flex; justify-content:space-between; align-items:center;
-  padding:12px 24px; background: var(--panel-bg); border-bottom:2px solid var(--border);
-  position:relative; z-index:1;
-}
-.logo-container{
-  display:flex; flex-direction:column; align-items:center;
-  transition: all 0.8s ease-out;
-}
-.logo-container img{
-  max-width:180px; height:auto; margin-bottom:4px;
-}
-.site-name{ color: var(--accent); font-weight:700; font-size:20px; }
-.site-subtext{ color: var(--white); font-size:12px; }
-.nav a{
-  color: var(--white); text-decoration:none; margin-left:12px; padding:6px 10px; border:1px solid var(--border); border-radius:0; background:#002200;
-  transition: background 0.2s, color 0.2s;
-}
-.nav a.active, .nav a:hover{ background: var(--accent); color:#001100; cursor:pointer; }
-.container{ max-width:1100px; margin:24px auto; padding:16px; }
-.panel{ 
-  background: #002200; 
-  border:1px solid var(--border); border-radius:0; padding:20px; margin-bottom:24px;
-}
-.panel h2{ color: var(--accent); font-size:24px; margin-bottom:12px; }
-.panel p, .panel li{ color: var(--white); font-size:16px; }
-.panel ul{ margin-left:20px; margin-top:8px; }
-.map-holder{ width:100%; height:700px; background:#001100; border:2px solid #ff0000; border-radius:0; overflow:hidden; display:flex; justify-content:center; align-items:center; }
-.map-overlay-text{ color:#f0f0d0; font-size:18px; font-weight:bold; text-align:center; animation: flicker 1s infinite; }
-@keyframes flicker{ 0%,19%,21%,23%,25%,54%,56%,100%{opacity:1;} 20%,22%,24%,55%{opacity:0;} }
-ul{margin-top:8px; margin-left:20px;} li{margin-bottom:4px;}
-.footer{ font-size:12px; text-align:center; color: var(--white); margin-top:32px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OUTPOST GAMES | RATTACK</title>
+    
+    <!-- THREE.JS ENGINE -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- GLITCH FONT -->
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- CORE SYSTEM --- */
+        :root {
+            --bg: #000000;
+            --primary: #ffffff;
+            --accent: #00ff9d; /* Radioactive Green */
+            --alert: #ff0055;
+            --glass: rgba(5, 5, 5, 0.85);
+        }
 
-/* Scanline overlay */
-body::after{
-  content:""; position:fixed; top:0; left:0; width:100%; height:100%;
-  background: repeating-linear-gradient(transparent, transparent 1px, rgba(0,255,0,0.05) 2px);
-  pointer-events:none; z-index:9999;
-}
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
 
-/* Intro */
-#intro{
-  position:fixed; top:0; left:0; width:100vw; height:100vh; background:#001100;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  z-index:10000; transition: opacity 1s ease;
-}
-#intro img{
-  max-width:300px; height:auto;
-  transition: all 0.6s cubic-bezier(0.4,0,0.2,1);
-}
-#intro .site-text{ color: var(--accent); font-weight:700; font-size:28px; margin-top:12px; }
-#intro .site-subtext{ color: var(--white); font-size:14px; margin-top:4px; }
-#enterBtn{ margin-top:20px; background: var(--accent); color:#001100; font-family:'Share Tech Mono'; font-size:24px; padding:20px 40px; border:none; cursor:pointer; }
-#enterBtn:hover{ background:#00cc00; }
+        body {
+            background-color: var(--bg);
+            color: var(--primary);
+            font-family: 'Share Tech Mono', monospace; /* Tech Font */
+            overflow: hidden;
+            height: 100vh; width: 100vw;
+        }
 
-/* Hide app initially */
-#app{ display:none; }
+        /* --- 3D CANVAS & FX LAYERS --- */
+        #world { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        
+        /* DIGITAL NOISE OVERLAY (Static) */
+        #noise {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 900; opacity: 0.08;
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAA5OTkAAABERERmZmYzMzNmZmZERERxk0ChAAAACHRSTlMAMwA3MzMzM7O0s1EAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAA8SURBVDjLY2AYBaNgKLGhQGlpKQgzkEphYGBoYEAphYGBgYEhA4QZSKUwMDAwMDCAlIJMQCqFgcEACg4FAABcCxGQW1M9AAAAAElFTkSuQmCC');
+            animation: noiseAnim 0.2s infinite;
+        }
+        @keyframes noiseAnim { 0% {transform: translate(0,0)} 50% {transform: translate(-2%, 2%)} 100% {transform: translate(1%, -1%)} }
 
-/* Updates Panel */
-#updates-content {
-  background: #001500;
-  padding: 16px;
-  border: 1px solid var(--border);
-  white-space: pre-wrap;
-  overflow-y: auto;
-  max-height: 600px;
-}
-</style>
+        /* SCANLINES */
+        .scanlines {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px; pointer-events: none; z-index: 999;
+        }
+
+        /* --- UI INTERFACE --- */
+        #interface {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10; display: flex; flex-direction: column;
+            perspective: 1500px;
+        }
+
+        /* --- CSS GENERATED LOGO --- */
+        .logo-box {
+            width: 50px; height: 50px;
+            border: 2px solid var(--primary);
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+            animation: pulseBorder 2s infinite;
+            margin-right: 15px;
+        }
+        .logo-inner {
+            width: 30px; height: 30px;
+            border: 1px solid var(--accent);
+            transform: rotate(45deg);
+            animation: spinLogo 4s infinite linear;
+        }
+        .logo-dot {
+            width: 6px; height: 6px; background: var(--alert);
+            position: absolute;
+            box-shadow: 0 0 10px var(--alert);
+            animation: blinkLogo 0.5s infinite;
+        }
+        @keyframes spinLogo { 0% {transform: rotate(45deg);} 100% {transform: rotate(405deg);} }
+        @keyframes blinkLogo { 0%, 100% {opacity: 1;} 50% {opacity: 0;} }
+        @keyframes pulseBorder { 0% {box-shadow: 0 0 5px var(--primary);} 50% {box-shadow: 0 0 20px var(--primary);} 100% {box-shadow: 0 0 5px var(--primary);} }
+
+        /* --- NAV BAR --- */
+        nav {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 50px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(4px);
+        }
+        
+        .brand-text { 
+            font-size: 1.8rem; font-weight: 900; letter-spacing: 4px; 
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .menu-items button {
+            background: rgba(0,0,0,0.5); border: 1px solid #333;
+            color: #888; font-family: inherit; font-size: 1rem;
+            margin-left: 10px; padding: 10px 20px;
+            text-transform: uppercase; transition: 0.3s;
+            position: relative; overflow: hidden;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+        }
+        .menu-items button:hover, .menu-items button.active {
+            color: var(--bg); background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 25px var(--primary);
+        }
+
+        /* --- HOLOGRAPHIC CARD --- */
+        #content-stage {
+            flex: 1; display: flex; align-items: center; justify-content: center;
+        }
+
+        #hologram {
+            width: 80%; max-width: 900px; height: 70vh;
+            background: var(--glass);
+            border: 1px solid var(--primary);
+            padding: 60px;
+            overflow-y: auto;
+            transform-style: preserve-3d;
+            box-shadow: 0 0 50px rgba(0,255,157,0.1);
+            position: relative;
+        }
+
+        /* Decorative Corner Brackets */
+        #hologram::before {
+            content: ''; position: absolute; top: -2px; left: -2px; width: 30px; height: 30px;
+            border-top: 4px solid var(--accent); border-left: 4px solid var(--accent);
+        }
+        #hologram::after {
+            content: ''; position: absolute; bottom: -2px; right: -2px; width: 30px; height: 30px;
+            border-bottom: 4px solid var(--accent); border-right: 4px solid var(--accent);
+        }
+
+        /* --- TEXT FX --- */
+        h1 {
+            font-size: 5rem; line-height: 0.9; margin-bottom: 10px;
+            text-transform: uppercase; color: transparent;
+            -webkit-text-stroke: 2px var(--primary);
+            text-shadow: 3px 3px 0px var(--accent);
+            animation: glitchText 3s infinite alternate;
+        }
+
+        @keyframes glitchText {
+            0% { text-shadow: 3px 3px 0px var(--accent); }
+            20% { text-shadow: -3px 3px 0px var(--alert); }
+            40% { text-shadow: -3px -3px 0px var(--accent); }
+            60% { text-shadow: 3px -3px 0px var(--alert); }
+            80% { text-shadow: 3px 3px 0px var(--accent); }
+            100% { text-shadow: 3px 3px 0px var(--alert); }
+        }
+
+        h2 {
+            font-size: 1.5rem; border-left: 4px solid var(--accent);
+            padding-left: 15px; margin: 30px 0 15px 0; color: #eee;
+        }
+
+        p { font-size: 1.1rem; line-height: 1.6; color: #aaa; margin-bottom: 15px; }
+        .highlight { color: var(--accent); font-weight: bold; text-transform: uppercase; }
+        .warning { color: var(--alert); font-weight: bold; }
+
+        /* --- SECTIONS --- */
+        .section { display: none; }
+        .section.active { display: block; animation: decodeFade 0.5s forwards; }
+        
+        @keyframes decodeFade {
+            0% { opacity: 0; transform: translateX(-20px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        /* --- LOADER --- */
+        #loader {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: #000; z-index: 2000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 1s ease-out;
+        }
+        .loader-ring {
+            width: 80px; height: 80px; border: 4px solid #333;
+            border-top: 4px solid var(--accent); border-radius: 50%;
+            animation: spinLogo 1s infinite linear; margin-bottom: 20px;
+        }
+
+    </style>
 </head>
 <body>
 
-<audio id="startupSound" src="startup-87026.mp3"></audio>
+    <!-- 1. LAYERS -->
+    <div id="world"></div>
+    <div id="noise"></div>
+    <div class="scanlines"></div>
 
-<div id="intro">
-  <img id="introLogo" src="The.png" alt="Logo">
-  <div class="site-text">Site-OC-01</div>
-  <div class="site-subtext">A project by OCCUPY.</div>
-  <button id="enterBtn">Enter the Facility</button>
-</div>
+    <!-- 2. LOADER -->
+    <div id="loader">
+        <div class="loader-ring"></div>
+        <div id="load-text" style="letter-spacing: 3px;">INITIALIZING...</div>
+    </div>
 
-<div id="app">
-<header>
-  <div class="logo-container" id="headerLogoContainer">
-    <img src="The.png" alt="Logo">
-    <div class="site-name">Site-OC-01 — OCCUPY Containment & Research Facility</div>
-    <div class="site-subtext">A project by OCCUPY.</div>
-  </div>
-  <nav class="nav">
-    <a href="#" data-page="home" class="active">Home</a>
-    <a href="#" data-page="map">Map</a>
-    <a href="#" data-page="updates">Updates</a>
-    <a href="#" data-page="about">About</a>
-    <a href="#" data-page="privacy">Privacy Policy</a>
-  </nav>
-</header>
+    <!-- 3. INTERFACE -->
+    <div id="interface">
+        <nav>
+            <div style="display:flex; align-items:center;">
+                <!-- CUSTOM CSS LOGO -->
+                <div class="logo-box">
+                    <div class="logo-inner"></div>
+                    <div class="logo-dot"></div>
+                </div>
+                <div class="brand-text">OUTPOST<span style="color:var(--accent)">GAMES</span></div>
+            </div>
+            <div class="menu-items">
+                <button onmouseenter="scramble(this)" onclick="warpTo('home')" class="active">RATTACK</button>
+                <button onmouseenter="scramble(this)" onclick="warpTo('about')">PROFILE</button>
+                <button onmouseenter="scramble(this)" onclick="warpTo('privacy')">DATA_LOGS</button>
+            </div>
+        </nav>
 
-<div class="container">
+        <div id="content-stage">
+            <div id="hologram">
+                
+                <!-- HOME -->
+                <div id="home" class="section active">
+                    <div style="color:var(--accent); font-size:0.9rem; margin-bottom:10px;">>> SYSTEM: READY <<</div>
+                    <h1>RATTACK</h1>
+                    <p class="warning">WARNING: CONTAINS EXTREME HORROR & JUMPSCARES</p>
+                    <p>>> LAUNCH DATE: <span class="highlight">DECEMBER 2025</span></p>
+                    
+                    <h2>THE VOID AWAITS</h2>
+                    <p>
+                        <strong>RATTACK</strong> is a VR survival horror experience built on raw adrenaline.
+                        Utilizing <strong>Gorilla-Tag locomotion</strong>, you are not just playing a character; you are the prey.
+                    </p>
+                    <p>
+                        Navigate a non-euclidean facility that changes every time you blink. 
+                        The entities are fast. The jumpscares are unscripted.
+                        Run. Climb. Survive.
+                    </p>
 
-<section id="home" class="panel" style="display:block;">
-<h2>Welcome to Site-OC-01</h2>
+                    <h2>FEATURES</h2>
+                    <ul style="margin-left:20px; color:#ccc; line-height:1.8;">
+                        <li>Physics-based climbing mechanics</li>
+                        <li>Procedural level generation</li>
+                        <li>Adaptive AI that learns your routes</li>
+                    </ul>
+                </div>
 
-<p>Hi, my name is Occupy and I am actively working on a project inspired by the SCP Foundation, though not affiliated.</p>
+                <!-- ABOUT -->
+                <div id="about" class="section">
+                    <h1>ARCHITECT</h1>
+                    <p>IDENTITY: <span class="highlight">@OCCUPY</span></p>
+                    
+                    <h2>SOLO DEVELOPMENT</h2>
+                    <p>
+                        I am a single developer working on a 24/7 cycle. 
+                        Outpost Games was founded to prove that one person with enough obsession can rival AAA studios.
+                    </p>
+                    <p>
+                        Every texture, sound, and line of code is handcrafted. 
+                        This is not an asset flip. This is a nightmare built from scratch.
+                    </p>
 
-<p>This will mainly be an XR or VR project, and I will now go further in depth about this:</p>
+                    <h2>CONTACT</h2>
+                    <p>Business / Press / Bug Reports:</p>
+                    <div style="background:#111; padding:15px; border:1px dashed #333; display:inline-block;">
+                        outpostgames.vr@gmail.com
+                    </div>
+                </div>
 
-<ul>
-  <li>This will mainly be a horror-focused game/project.</li>
-  <li>It will take a while to polish and get ready.</li>
-  <li>There are multiple 'wings' to the facility site in VR, and I will now go further in depth:</li>
-</ul>
+                <!-- PRIVACY -->
+                <div id="privacy" class="section">
+                    <h1>DATA LOGS</h1>
+                    <p style="font-size:0.8rem; color:var(--accent);">STATUS: COMPLIANT (META / GDPR)</p>
 
-<ul>
-  <li><strong>TOG-Alpha:</strong> Admin / Research Hubs that include labs housing the latest technology and rooms where anomalies are reviewed as a way to prepare for cataloging.</li>
-  <li><strong>TOG-Bravo:</strong> Experimental labs that experiment on weird specimens and anomalies while still under containment.</li>
-  <li><strong>TOG-Charlie:</strong> A containment wing with high-risk anomalous entities with containment cells, observation areas, and emergency lockdowns if necessary.</li>
-  <li><strong>TOG-Delta:</strong> Surveillance / Security operations areas which include monitoring stations, patrol routes, and security points.</li>
-  <li><strong>TOG-Echo:</strong> Maintenance / Reactor areas which include environmental hazards, and essential systems outlined for operations floor plan.</li>
-  <li><strong>TOG-Zeta:</strong> Quarantine wing for isolated, highly unstable anomalous entities—mostly each other and redundant for containment.</li>
-</ul>
+                    <h2>1. DATA COLLECTION</h2>
+                    <p>We collect only what is necessary for the simulation to function:</p>
+                    <ul>
+                        <li><strong>Meta ID:</strong> For multiplayer authentication.</li>
+                        <li><strong>Headset Model:</strong> To optimize graphics performance.</li>
+                    </ul>
+                    <p class="warning">NOTE: WE DO NOT RECORD AUDIO.</p>
 
-<p>This will be a solo dev project and WILL release on the Meta store. The project is most likely releasing very late 2025 or early 2026. See you all until then! I will be posting updates on the "Updates" page.</p>
+                    <h2>2. NETWORK INFRASTRUCTURE</h2>
+                    <p>Your data is processed via secure third-party nodes:</p>
+                    <ul>
+                        <li><strong>Photon Fusion:</strong> Real-time networking.</li>
+                        <li><strong>PlayFab:</strong> Cloud saves & progression.</li>
+                    </ul>
 
-</section>
+                    <h2>3. DELETION PROTOCOLS</h2>
+                    <p>
+                        To purge your existence from our database, email <span class="highlight">outpostgames.vr@gmail.com</span> 
+                        with the subject "PURGE DATA".
+                    </p>
+                </div>
 
-<section id="updates" class="panel" style="display:none;">
-<h2>Project Updates</h2>
-<div id="updates-content">Fetching updates...</div>
-</section>
+            </div>
+        </div>
+    </div>
 
-<section id="map" class="panel" style="display:none;">
-<h2>Interactive Facility Map</h2>
-<div class="map-holder">
-  <div class="map-overlay-text">We’re not sure what’s happening here right now… it’ll be back soon.</div>
-</div>
-</section>
+    <script>
+        // --- LOADER LOGIC ---
+        window.onload = () => {
+            const loadText = document.getElementById('load-text');
+            let dots = 0;
+            const interval = setInterval(() => {
+                dots = (dots + 1) % 4;
+                loadText.innerText = "INITIALIZING" + ".".repeat(dots);
+            }, 200);
 
-<section id="about" class="panel" style="display:none;">
-<h2>About Site-OC-01</h2>
-<p>Site-OC-01 is a VR project created by OCCUPY. All content is protected under CC BY-NC-ND 4.0.</p>
-</section>
+            setTimeout(() => {
+                clearInterval(interval);
+                document.getElementById('loader').style.opacity = 0;
+                setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 1000);
+            }, 2000);
+        };
 
-<section id="privacy" class="panel" style="display:none;">
-<h2>Privacy Policy</h2>
-<p>Oops, we're not there yet.</p>
-</section>
+        // --- TEXT SCRAMBLER EFFECT (HOVER) ---
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*";
+        window.scramble = (element) => {
+            const original = element.innerText;
+            let iterations = 0;
+            const interval = setInterval(() => {
+                element.innerText = original.split("")
+                    .map((letter, index) => {
+                        if(index < iterations) return original[index];
+                        return chars[Math.floor(Math.random() * chars.length)];
+                    }).join("");
+                
+                if(iterations >= original.length) clearInterval(interval);
+                iterations += 1/3;
+            }, 30);
+        }
 
-<div class="footer">© OCCUPY — Site-OC-01 · Licensed CC BY-NC-ND 4.0</div>
-</div>
-</div>
+        // --- THREE.JS "CHAOS ENGINE" ---
+        const scene = new THREE.Scene();
+        // Deep red fog for horror vibe
+        scene.fog = new THREE.FogExp2(0x000000, 0.002);
 
-<script>
-document.addEventListener("DOMContentLoaded", function(){
-  const intro = document.getElementById('intro');
-  const introLogo = document.getElementById('introLogo');
-  const app = document.getElementById('app');
-  const enterBtn = document.getElementById('enterBtn');
-  const startupAudio = document.getElementById('startupSound');
-  const updatesContainer = document.getElementById('updates-content');
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 3000);
+        camera.position.z = 600;
 
-  // Intro / enter button logic
-  enterBtn.addEventListener('click', ()=>{
-    introLogo.style.transform = 'scale(0.6) translateY(-80px)';
-    intro.style.opacity = '0';
-    setTimeout(()=>{
-      intro.style.display='none';
-      app.style.display='block';
-      try{ startupAudio.play(); } catch(e){ console.log(e); }
-    }, 800);
-  });
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.getElementById('world').appendChild(renderer.domElement);
 
-  // Navigation
-  document.querySelectorAll('.nav a').forEach(a=>{
-    a.addEventListener('click', e=>{
-      e.preventDefault();
-      const page = a.dataset.page;
-      document.querySelectorAll('.container section').forEach(s=>s.style.display='none');
-      document.getElementById(page).style.display='block';
-      document.querySelectorAll('.nav a').forEach(x=>x.classList.remove('active'));
-      a.classList.add('active');
-      window.scrollTo({top:0, behavior:'smooth'});
+        // 1. WARP STARS
+        const starGeo = new THREE.BufferGeometry();
+        const starCount = 4000;
+        const posArray = new Float32Array(starCount * 3);
+        const velArray = [];
 
-      // If updates page, fetch local updates.txt
-      if(page === 'updates'){
-        fetch('updates.txt')
-          .then(res => res.ok ? res.text() : Promise.reject('Failed to fetch updates'))
-          .then(text => updatesContainer.textContent = text)
-          .catch(() => updatesContainer.textContent = 'Could not fetch updates at this time.');
-      }
-    });
-  });
-});
-</script>
+        for(let i=0; i<starCount*3; i+=3) {
+            posArray[i] = (Math.random() - 0.5) * 2000;
+            posArray[i+1] = (Math.random() - 0.5) * 2000;
+            posArray[i+2] = (Math.random() - 0.5) * 2000;
+            velArray.push(Math.random() * 2 + 1);
+        }
+        starGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 1.5 });
+        const starField = new THREE.Points(starGeo, starMat);
+        scene.add(starField);
+
+        // 2. FLUX GEOMETRY (The Spinning Wireframe Shape)
+        const shapeGeo = new THREE.IcosahedronGeometry(300, 1);
+        const shapeMat = new THREE.MeshBasicMaterial({ 
+            color: 0x00ff9d, 
+            wireframe: true, 
+            transparent: true, 
+            opacity: 0.1 
+        });
+        const fluxShape = new THREE.Mesh(shapeGeo, shapeMat);
+        scene.add(fluxShape);
+
+        // 3. FLOATING CUBES (Data Debris)
+        const debrisGroup = new THREE.Group();
+        const cubeGeo = new THREE.BoxGeometry(10, 10, 10);
+        const cubeMat = new THREE.MeshBasicMaterial({ color: 0xff0055, wireframe: true });
+        
+        for(let i=0; i<50; i++) {
+            const cube = new THREE.Mesh(cubeGeo, cubeMat);
+            cube.position.set(
+                (Math.random()-0.5)*1000,
+                (Math.random()-0.5)*1000,
+                (Math.random()-0.5)*1000
+            );
+            cube.userData = { 
+                rotSpeed: Math.random() * 0.05,
+                floatSpeed: Math.random() * 2
+            };
+            debrisGroup.add(cube);
+        }
+        scene.add(debrisGroup);
+
+        // --- ANIMATION LOOP ---
+        let speedMult = 1.0;
+        let targetMult = 1.0;
+        let mouseX = 0, mouseY = 0;
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Smooth Warp
+            speedMult += (targetMult - speedMult) * 0.05;
+
+            // Stars Move
+            const positions = starField.geometry.attributes.position.array;
+            for(let i=0; i<starCount; i++) {
+                positions[i*3+2] += velArray[i] * speedMult;
+                if(positions[i*3+2] > 600) {
+                    positions[i*3+2] = -1400;
+                    positions[i*3] = (Math.random()-0.5)*2000;
+                    positions[i*3+1] = (Math.random()-0.5)*2000;
+                }
+            }
+            starField.geometry.attributes.position.needsUpdate = true;
+
+            // Flux Shape Morphs
+            fluxShape.rotation.x += 0.002 * speedMult;
+            fluxShape.rotation.y += 0.003 * speedMult;
+            const scale = 1 + Math.sin(Date.now() * 0.001) * 0.1;
+            fluxShape.scale.set(scale, scale, scale);
+
+            // Debris Float
+            debrisGroup.children.forEach(c => {
+                c.rotation.x += c.userData.rotSpeed;
+                c.rotation.y += c.userData.rotSpeed;
+                c.position.z += c.userData.floatSpeed * speedMult;
+                if(c.position.z > 600) c.position.z = -1000;
+            });
+
+            // Camera Parallax
+            camera.position.x += (mouseX * 50 - camera.position.x) * 0.05;
+            camera.position.y += (mouseY * 50 - camera.position.y) * 0.05;
+            camera.lookAt(scene.position);
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // --- INTERACTION ---
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth) - 0.5;
+            mouseY = (e.clientY / window.innerHeight) - 0.5;
+            
+            // Tilt Hologram
+            const card = document.getElementById('hologram');
+            card.style.transform = `rotateX(${mouseY * -10}deg) rotateY(${mouseX * 10}deg)`;
+        });
+
+        window.warpTo = (id) => {
+            // UI Update
+            document.querySelectorAll('.menu-items button').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Content Swap
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            
+            // WARP EFFECT
+            targetMult = 20.0; // HYPER SPEED
+            
+            setTimeout(() => {
+                document.getElementById(id).classList.add('active');
+                targetMult = 1.0; // Slow Down
+            }, 300);
+        };
+
+        // Handle Window Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+    </script>
 </body>
 </html>
