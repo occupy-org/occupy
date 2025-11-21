@@ -15,9 +15,10 @@
         :root {
             --bg: #000000;
             --primary: #ffffff;
-            --accent: #00ff9d; /* Radioactive Green */
+            --accent: #00ff9d;
             --alert: #ff0055;
             --glass: rgba(5, 5, 5, 0.85);
+            --debris: #888888; /* Gray for the explosion */
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
@@ -25,15 +26,29 @@
         body {
             background-color: var(--bg);
             color: var(--primary);
-            font-family: 'Share Tech Mono', monospace; /* Tech Font */
+            font-family: 'Share Tech Mono', monospace;
             overflow: hidden;
             height: 100vh; width: 100vw;
         }
 
-        /* --- 3D CANVAS & FX LAYERS --- */
+        /* --- 3D CANVAS --- */
         #world { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
         
-        /* DIGITAL NOISE OVERLAY (Static) */
+        /* --- EXPLOSION CONTAINER --- */
+        #debris-field {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 3000; overflow: hidden;
+        }
+        .debris-particle {
+            position: absolute;
+            color: var(--debris);
+            font-weight: bold;
+            font-size: 1.2rem;
+            user-select: none;
+            will-change: transform, opacity;
+        }
+
+        /* --- DIGITAL NOISE --- */
         #noise {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 900; opacity: 0.08;
@@ -42,13 +57,6 @@
         }
         @keyframes noiseAnim { 0% {transform: translate(0,0)} 50% {transform: translate(-2%, 2%)} 100% {transform: translate(1%, -1%)} }
 
-        /* SCANLINES */
-        .scanlines {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
-            background-size: 100% 4px; pointer-events: none; z-index: 999;
-        }
-
         /* --- UI INTERFACE --- */
         #interface {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -56,14 +64,14 @@
             perspective: 1500px;
         }
 
-        /* --- CSS GENERATED LOGO --- */
+        /* --- CUSTOM CSS LOGO --- */
         .logo-box {
             width: 50px; height: 50px;
             border: 2px solid var(--primary);
             position: relative;
             display: flex; align-items: center; justify-content: center;
-            animation: pulseBorder 2s infinite;
             margin-right: 15px;
+            box-shadow: 0 0 10px var(--primary);
         }
         .logo-inner {
             width: 30px; height: 30px;
@@ -79,7 +87,6 @@
         }
         @keyframes spinLogo { 0% {transform: rotate(45deg);} 100% {transform: rotate(405deg);} }
         @keyframes blinkLogo { 0%, 100% {opacity: 1;} 50% {opacity: 0;} }
-        @keyframes pulseBorder { 0% {box-shadow: 0 0 5px var(--primary);} 50% {box-shadow: 0 0 20px var(--primary);} 100% {box-shadow: 0 0 5px var(--primary);} }
 
         /* --- NAV BAR --- */
         nav {
@@ -123,7 +130,10 @@
             transform-style: preserve-3d;
             box-shadow: 0 0 50px rgba(0,255,157,0.1);
             position: relative;
+            opacity: 0; /* Hidden until load completes */
+            animation: cardFadeIn 1s forwards 2.5s; /* Waits for explosion */
         }
+        @keyframes cardFadeIn { to { opacity: 1; } }
 
         /* Decorative Corner Brackets */
         #hologram::before {
@@ -135,7 +145,6 @@
             border-bottom: 4px solid var(--accent); border-right: 4px solid var(--accent);
         }
 
-        /* --- TEXT FX --- */
         h1 {
             font-size: 5rem; line-height: 0.9; margin-bottom: 10px;
             text-transform: uppercase; color: transparent;
@@ -143,21 +152,14 @@
             text-shadow: 3px 3px 0px var(--accent);
             animation: glitchText 3s infinite alternate;
         }
-
         @keyframes glitchText {
             0% { text-shadow: 3px 3px 0px var(--accent); }
-            20% { text-shadow: -3px 3px 0px var(--alert); }
-            40% { text-shadow: -3px -3px 0px var(--accent); }
-            60% { text-shadow: 3px -3px 0px var(--alert); }
-            80% { text-shadow: 3px 3px 0px var(--accent); }
             100% { text-shadow: 3px 3px 0px var(--alert); }
         }
-
         h2 {
             font-size: 1.5rem; border-left: 4px solid var(--accent);
             padding-left: 15px; margin: 30px 0 15px 0; color: #eee;
         }
-
         p { font-size: 1.1rem; line-height: 1.6; color: #aaa; margin-bottom: 15px; }
         .highlight { color: var(--accent); font-weight: bold; text-transform: uppercase; }
         .warning { color: var(--alert); font-weight: bold; }
@@ -165,7 +167,6 @@
         /* --- SECTIONS --- */
         .section { display: none; }
         .section.active { display: block; animation: decodeFade 0.5s forwards; }
-        
         @keyframes decodeFade {
             0% { opacity: 0; transform: translateX(-20px); }
             100% { opacity: 1; transform: translateX(0); }
@@ -176,7 +177,7 @@
             position: fixed; top:0; left:0; width:100%; height:100%;
             background: #000; z-index: 2000;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 1s ease-out;
+            transition: opacity 0.5s ease-out;
         }
         .loader-ring {
             width: 80px; height: 80px; border: 4px solid #333;
@@ -191,12 +192,12 @@
     <!-- 1. LAYERS -->
     <div id="world"></div>
     <div id="noise"></div>
-    <div class="scanlines"></div>
+    <div id="debris-field"></div> <!-- Where the text explodes -->
 
     <!-- 2. LOADER -->
     <div id="loader">
         <div class="loader-ring"></div>
-        <div id="load-text" style="letter-spacing: 3px;">INITIALIZING...</div>
+        <div id="load-text" style="letter-spacing: 3px;">INITIALIZING SYSTEM...</div>
     </div>
 
     <!-- 3. INTERFACE -->
@@ -211,33 +212,33 @@
                 <div class="brand-text">OUTPOST<span style="color:var(--accent)">GAMES</span></div>
             </div>
             <div class="menu-items">
-                <button onmouseenter="scramble(this)" onclick="warpTo('home')" class="active">RATTACK</button>
-                <button onmouseenter="scramble(this)" onclick="warpTo('about')">PROFILE</button>
-                <button onmouseenter="scramble(this)" onclick="warpTo('privacy')">DATA_LOGS</button>
+                <!-- Hovering scrambles text. Buttons switch tabs. -->
+                <button id="btn-home" onmouseenter="scramble(this)" onclick="warpTo('home')" class="active">RATTACK</button>
+                <button id="btn-about" onmouseenter="scramble(this)" onclick="warpTo('about')">PROFILE</button>
+                <button id="btn-privacy" onmouseenter="scramble(this)" onclick="warpTo('privacy')">DATA_LOGS</button>
             </div>
         </nav>
 
         <div id="content-stage">
             <div id="hologram">
                 
-                <!-- HOME -->
+                <!-- HOME TAB -->
                 <div id="home" class="section active">
                     <div style="color:var(--accent); font-size:0.9rem; margin-bottom:10px;">>> SYSTEM: READY <<</div>
                     <h1>RATTACK</h1>
                     <p class="warning">WARNING: CONTAINS EXTREME HORROR & JUMPSCARES</p>
-                    <p>>> LAUNCH DATE: <span class="highlight">DECEMBER 2025</span></p>
+                    <p>>> RELEASE TARGET: <span class="highlight">DECEMBER 2025</span></p>
                     
                     <h2>THE VOID AWAITS</h2>
                     <p>
                         <strong>RATTACK</strong> is a VR survival horror experience built on raw adrenaline.
-                        Utilizing <strong>Gorilla-Tag locomotion</strong>, you are not just playing a character; you are the prey.
+                        Utilizing <strong>Gorilla-Tag style locomotion</strong>, you are not just playing a character; you are the prey.
                     </p>
                     <p>
                         Navigate a non-euclidean facility that changes every time you blink. 
                         The entities are fast. The jumpscares are unscripted.
                         Run. Climb. Survive.
                     </p>
-
                     <h2>FEATURES</h2>
                     <ul style="margin-left:20px; color:#ccc; line-height:1.8;">
                         <li>Physics-based climbing mechanics</li>
@@ -246,7 +247,7 @@
                     </ul>
                 </div>
 
-                <!-- ABOUT -->
+                <!-- ABOUT TAB -->
                 <div id="about" class="section">
                     <h1>ARCHITECT</h1>
                     <p>IDENTITY: <span class="highlight">@OCCUPY</span></p>
@@ -260,7 +261,6 @@
                         Every texture, sound, and line of code is handcrafted. 
                         This is not an asset flip. This is a nightmare built from scratch.
                     </p>
-
                     <h2>CONTACT</h2>
                     <p>Business / Press / Bug Reports:</p>
                     <div style="background:#111; padding:15px; border:1px dashed #333; display:inline-block;">
@@ -268,7 +268,7 @@
                     </div>
                 </div>
 
-                <!-- PRIVACY -->
+                <!-- PRIVACY TAB -->
                 <div id="privacy" class="section">
                     <h1>DATA LOGS</h1>
                     <p style="font-size:0.8rem; color:var(--accent);">STATUS: COMPLIANT (META / GDPR)</p>
@@ -286,6 +286,7 @@
                     <ul>
                         <li><strong>Photon Fusion:</strong> Real-time networking.</li>
                         <li><strong>PlayFab:</strong> Cloud saves & progression.</li>
+                        <li><strong>Google Firebase:</strong> Analytics.</li>
                     </ul>
 
                     <h2>3. DELETION PROTOCOLS</h2>
@@ -300,23 +301,65 @@
     </div>
 
     <script>
-        // --- LOADER LOGIC ---
+        // --- 1. EXPLOSION EFFECT & LOADER ---
         window.onload = () => {
             const loadText = document.getElementById('load-text');
-            let dots = 0;
-            const interval = setInterval(() => {
-                dots = (dots + 1) % 4;
-                loadText.innerText = "INITIALIZING" + ".".repeat(dots);
-            }, 200);
-
+            
+            // Simulate brief loading
             setTimeout(() => {
-                clearInterval(interval);
+                triggerExplosion(); // BOOM
+                
+                // Fade out loader
                 document.getElementById('loader').style.opacity = 0;
-                setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 1000);
-            }, 2000);
+                setTimeout(() => { 
+                    document.getElementById('loader').style.display = 'none'; 
+                    
+                    // CHECK FOR DIRECT LINK
+                    // If URL ends in #privacy, warp there immediately
+                    if(window.location.hash === '#privacy') {
+                        warpTo('privacy');
+                    }
+                }, 500);
+            }, 1500);
         };
 
-        // --- TEXT SCRAMBLER EFFECT (HOVER) ---
+        function triggerExplosion() {
+            const field = document.getElementById('debris-field');
+            const symbols = ['#', '@', '!'];
+            const count = 100; // Amount of debris
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+
+            for(let i=0; i<count; i++) {
+                const el = document.createElement('div');
+                el.classList.add('debris-particle');
+                el.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                
+                // Start at center
+                el.style.left = centerX + 'px';
+                el.style.top = centerY + 'px';
+                
+                field.appendChild(el);
+
+                // Random Velocity
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = Math.random() * 800 + 200; // Speed
+                const destX = Math.cos(angle) * velocity;
+                const destY = Math.sin(angle) * velocity;
+                const rot = Math.random() * 720 - 360;
+
+                // Animate
+                el.animate([
+                    { transform: 'translate(0,0) scale(1)', opacity: 1 },
+                    { transform: `translate(${destX}px, ${destY}px) rotate(${rot}deg) scale(0.5)`, opacity: 0 }
+                ], {
+                    duration: 1500,
+                    easing: 'cubic-bezier(0.1, 0.8, 0.2, 1)'
+                }).onfinish = () => el.remove();
+            }
+        }
+
+        // --- 2. TEXT SCRAMBLER (Hover Effect) ---
         const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*";
         window.scramble = (element) => {
             const original = element.innerText;
@@ -333,9 +376,30 @@
             }, 30);
         }
 
-        // --- THREE.JS "CHAOS ENGINE" ---
+        // --- 3. TAB SWITCHING / WARP SYSTEM ---
+        window.warpTo = (id) => {
+            // Update UI
+            document.querySelectorAll('.menu-items button').forEach(b => b.classList.remove('active'));
+            const btn = document.getElementById('btn-' + id);
+            if(btn) btn.classList.add('active');
+            
+            // Update Content
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            
+            // Set Hash (So link becomes site.com/#privacy)
+            if(id === 'home') history.pushState("", document.title, window.location.pathname + window.location.search);
+            else window.location.hash = id;
+
+            // WARP EFFECT (Speed up stars)
+            targetMult = 30.0; 
+            setTimeout(() => {
+                document.getElementById(id).classList.add('active');
+                targetMult = 1.0; 
+            }, 300);
+        };
+
+        // --- 4. THREE.JS BACKGROUND ---
         const scene = new THREE.Scene();
-        // Deep red fog for horror vibe
         scene.fog = new THREE.FogExp2(0x000000, 0.002);
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 3000);
@@ -346,12 +410,11 @@
         renderer.setPixelRatio(window.devicePixelRatio);
         document.getElementById('world').appendChild(renderer.domElement);
 
-        // 1. WARP STARS
+        // Stars
         const starGeo = new THREE.BufferGeometry();
         const starCount = 4000;
         const posArray = new Float32Array(starCount * 3);
         const velArray = [];
-
         for(let i=0; i<starCount*3; i+=3) {
             posArray[i] = (Math.random() - 0.5) * 2000;
             posArray[i+1] = (Math.random() - 0.5) * 2000;
@@ -363,75 +426,36 @@
         const starField = new THREE.Points(starGeo, starMat);
         scene.add(starField);
 
-        // 2. FLUX GEOMETRY (The Spinning Wireframe Shape)
+        // Flux Shape (Spinning Wireframe)
         const shapeGeo = new THREE.IcosahedronGeometry(300, 1);
-        const shapeMat = new THREE.MeshBasicMaterial({ 
-            color: 0x00ff9d, 
-            wireframe: true, 
-            transparent: true, 
-            opacity: 0.1 
-        });
+        const shapeMat = new THREE.MeshBasicMaterial({ color: 0x00ff9d, wireframe: true, transparent: true, opacity: 0.1 });
         const fluxShape = new THREE.Mesh(shapeGeo, shapeMat);
         scene.add(fluxShape);
 
-        // 3. FLOATING CUBES (Data Debris)
-        const debrisGroup = new THREE.Group();
-        const cubeGeo = new THREE.BoxGeometry(10, 10, 10);
-        const cubeMat = new THREE.MeshBasicMaterial({ color: 0xff0055, wireframe: true });
-        
-        for(let i=0; i<50; i++) {
-            const cube = new THREE.Mesh(cubeGeo, cubeMat);
-            cube.position.set(
-                (Math.random()-0.5)*1000,
-                (Math.random()-0.5)*1000,
-                (Math.random()-0.5)*1000
-            );
-            cube.userData = { 
-                rotSpeed: Math.random() * 0.05,
-                floatSpeed: Math.random() * 2
-            };
-            debrisGroup.add(cube);
-        }
-        scene.add(debrisGroup);
-
-        // --- ANIMATION LOOP ---
+        // Animation Loop
         let speedMult = 1.0;
         let targetMult = 1.0;
         let mouseX = 0, mouseY = 0;
 
         function animate() {
             requestAnimationFrame(animate);
+            speedMult += (targetMult - speedMult) * 0.05; // Smooth acceleration
 
-            // Smooth Warp
-            speedMult += (targetMult - speedMult) * 0.05;
-
-            // Stars Move
             const positions = starField.geometry.attributes.position.array;
             for(let i=0; i<starCount; i++) {
                 positions[i*3+2] += velArray[i] * speedMult;
                 if(positions[i*3+2] > 600) {
-                    positions[i*3+2] = -1400;
+                    positions[i*3+2] = -1400; // Reset far back
                     positions[i*3] = (Math.random()-0.5)*2000;
                     positions[i*3+1] = (Math.random()-0.5)*2000;
                 }
             }
             starField.geometry.attributes.position.needsUpdate = true;
 
-            // Flux Shape Morphs
             fluxShape.rotation.x += 0.002 * speedMult;
             fluxShape.rotation.y += 0.003 * speedMult;
-            const scale = 1 + Math.sin(Date.now() * 0.001) * 0.1;
-            fluxShape.scale.set(scale, scale, scale);
+            fluxShape.scale.setScalar(1 + Math.sin(Date.now()*0.001)*0.1);
 
-            // Debris Float
-            debrisGroup.children.forEach(c => {
-                c.rotation.x += c.userData.rotSpeed;
-                c.rotation.y += c.userData.rotSpeed;
-                c.position.z += c.userData.floatSpeed * speedMult;
-                if(c.position.z > 600) c.position.z = -1000;
-            });
-
-            // Camera Parallax
             camera.position.x += (mouseX * 50 - camera.position.x) * 0.05;
             camera.position.y += (mouseY * 50 - camera.position.y) * 0.05;
             camera.lookAt(scene.position);
@@ -440,34 +464,13 @@
         }
         animate();
 
-        // --- INTERACTION ---
         document.addEventListener('mousemove', (e) => {
             mouseX = (e.clientX / window.innerWidth) - 0.5;
             mouseY = (e.clientY / window.innerHeight) - 0.5;
-            
-            // Tilt Hologram
             const card = document.getElementById('hologram');
-            card.style.transform = `rotateX(${mouseY * -10}deg) rotateY(${mouseX * 10}deg)`;
+            if(card) card.style.transform = `rotateX(${mouseY * -10}deg) rotateY(${mouseX * 10}deg)`;
         });
 
-        window.warpTo = (id) => {
-            // UI Update
-            document.querySelectorAll('.menu-items button').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            // Content Swap
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            
-            // WARP EFFECT
-            targetMult = 20.0; // HYPER SPEED
-            
-            setTimeout(() => {
-                document.getElementById(id).classList.add('active');
-                targetMult = 1.0; // Slow Down
-            }, 300);
-        };
-
-        // Handle Window Resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
